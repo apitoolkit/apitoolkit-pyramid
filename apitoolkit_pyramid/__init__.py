@@ -139,7 +139,7 @@ class APIToolkit(object):
                 "response_body": base64.b64encode(response_body).decode("utf-8"),
                 "host": request.headers.get('HOST',""),
                 "referer": request.headers.get('Referer', ""),
-                "sdk_type": "PythonDjango",
+                "sdk_type": "PythonPyramid",
                 "project_id": self.meta["project_id"],
                 "status_code": status_code,
                 "errors": errors,

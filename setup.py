@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="apitoolkit-pyramid",
-    version="0.0.1",
+    version="0.1.2",
     packages=find_packages(),
     description='A Python Pyramid SDK for Apitoolkit integration',
     long_description=long_description,
@@ -18,7 +18,7 @@ setup(
         'google-cloud-pubsub',
         'google-auth',
         'jsonpath-ng',
-        'apitoolkit-python'
+        'apitoolkit-python',
         "pytz"
     ],
 )
