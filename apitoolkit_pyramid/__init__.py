@@ -15,7 +15,6 @@ from pyramid.request import Request
 
 class APIToolkit(object):
     def __init__(self, handler, registry):
-        print(registry, registry.settings)
         self.publisher = None
         self.topic_name = None
         self.meta = None
