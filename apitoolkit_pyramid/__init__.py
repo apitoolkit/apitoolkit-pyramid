@@ -96,7 +96,7 @@ class APIToolkit(object):
         content_type = request.headers.get('Content-Type', '')
 
         if content_type == 'application/json':
-            request_body = json.loads(request.body.decode('utf-8'))
+            request_body = request.json_body
         if content_type == 'text/plain':
             request_body = request.body.decode('utf-8')
         if content_type == 'application/x-www-form-urlencoded' or 'multipart/form-data' in content_type:
@@ -111,7 +111,7 @@ class APIToolkit(object):
             print("APIToolkit: after request")
         end_time = time.perf_counter_ns()
         url_path = request.matched_route.pattern if request.matched_route is not None else request.path
-        path_params = request.matchdict     
+        path_params = request.matchdict
         duration = (end_time - start_time)
         status_code = response.status_code
         request_body = json.dumps(request_body)
