@@ -1,15 +1,16 @@
+import base64
+import json
+import time
 import uuid
+from datetime import datetime
+from urllib.parse import urlsplit
+
+import pytz
 import requests
+from apitoolkit_python import report_error
 from google.cloud import pubsub_v1
 from google.oauth2 import service_account
 from jsonpath_ng import parse
-import json
-import base64
-import time
-from datetime import datetime
-import pytz
-from apitoolkit_python import observe_request, report_error
-from urllib.parse import urlsplit
 from pyramid.request import Request
 
 
@@ -22,6 +23,7 @@ class APIToolkit(object):
         self.debug = registry.settings.get('APITOOLKIT_DEBUG', False)
         self.redact_request_body = registry.settings.get('APITOOLKIT_REDACT_REQ_BODY', [])
         self.redact_response_body = registry.settings.get('APITOOLKIT_REDACT_RES_BODY', [])
+        self.routes_whitelist = registry.settings.get('APITOOLKIT_ROUTES_WHITELIST', [])
         self.get_response = handler
 
         self.service_version = registry.settings.get("APITOOLKIT_SERVICE_VERSION", None)
@@ -82,8 +84,14 @@ class APIToolkit(object):
         pass
 
     def __call__(self, request: Request):
+        response = self.get_response(request)
         if self.debug:
             print("APIToolkit: making request")
+        if self.routes_whitelist:
+            # return early when route does not match any of the whitelist routes
+            if not any([request.path.startswith(route) for route in self.routes_whitelist]):
+                return response
+
         start_time = time.perf_counter_ns()
         request_method = request.method
         raw_url = request.url
@@ -104,8 +112,6 @@ class APIToolkit(object):
         request.apitoolkit_message_id = str(uuid.uuid4())
         request.apitoolkit_errors = []
         request.apitoolkit_client = self
-
-        response = self.get_response(request)
 
         if self.debug:
             print("APIToolkit: after request")
