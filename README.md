@@ -14,6 +14,12 @@ Add your APIToolkit API key `APITOOLKIT_KEY` to your `development.ini` or `produ
 APITOOLKIT_KEY = "<YOUR_API_KEY>"
 ```
 
+When using ini files separate mulitple values with comma.
+
+```ini
+APITOOLKIT_REDACT_HEADERS = X-Secret1,X-Secret2
+```
+
 Then add apitoolkit pyramid tween in your server's config:
 
 ```python

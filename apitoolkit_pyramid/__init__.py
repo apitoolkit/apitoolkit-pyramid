@@ -13,25 +13,31 @@ from google.oauth2 import service_account
 from jsonpath_ng import parse
 from pyramid.request import Request
 
+OPTIONAL_SETTINGS = (
+    # var in class, environment name, type, default value
+    ('debug', 'APITOOLKIT_DEBUG', bool, False),
+    ('redact_headers', 'APITOOLKIT_REDACT_HEADERS', list, []),
+    ('redact_request_body', 'APITOOLKIT_REDACT_REQ_BODY', list, []),
+    ('redact_response_body', 'APITOOLKIT_REDACT_RES_BODY', list, []),
+    ('routes_whitelist', 'APITOOLKIT_ROUTES_WHITELIST', list, []),
+    ('service_version', 'APITOOLKIT_SERVICE_VERSION', str, None),
+    ('tags', 'APITOOLKIT_TAGS', list, []),
+)
+
 
 class APIToolkit(object):
     def __init__(self, handler, registry):
         self.publisher = None
         self.topic_name = None
         self.meta = None
-        self.redact_headers = registry.settings.get('APITOOLKIT_REDACT_HEADERS', [])
-        self.debug = registry.settings.get('APITOOLKIT_DEBUG', False)
-        self.redact_request_body = registry.settings.get('APITOOLKIT_REDACT_REQ_BODY', [])
-        self.redact_response_body = registry.settings.get('APITOOLKIT_REDACT_RES_BODY', [])
-        self.routes_whitelist = registry.settings.get('APITOOLKIT_ROUTES_WHITELIST', [])
         self.get_response = handler
-
-        self.service_version = registry.settings.get("APITOOLKIT_SERVICE_VERSION", None)
-        self.tags =registry.settings.get("APITOOLKIT_TAGS", [])
 
         api_key = registry.settings.get('APITOOLKIT_KEY')
         root_url = registry.settings.get('APITOOLKIT_ROOT_URL',
                            "https://app.apitoolkit.io")
+
+        for var_name, env_id, _type, default in OPTIONAL_SETTINGS:
+            self.prepare_optional_settings(var_name, registry.settings.get(env_id), _type, default)
 
         response = requests.get(url=root_url + "/api/client_metadata",
                                 headers={"Authorization": f"Bearer {api_key}"})
@@ -46,6 +52,16 @@ class APIToolkit(object):
             topic=data['topic_id'],
         )
         self.meta = data
+
+    def prepare_optional_settings(self, var_name, value, _type, default):
+        if _type in (bool, str):
+            setattr(self, var_name, value or default)
+        elif _type is list:
+            # env value can directly be a list or when given via ini file a comma separated string
+            try:
+                setattr(self, var_name, value.split(','))
+            except AttributeError:
+                setattr(self, var_name, value or [])
 
     def getInfo(self):
         return {"project_id": self.meta["project_id"], "service_version": self.service_version, "tags": self.tags}
