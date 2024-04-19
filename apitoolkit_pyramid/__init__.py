@@ -7,7 +7,7 @@ from urllib.parse import urlsplit
 
 import pytz
 import requests
-from apitoolkit_python import report_error
+from apitoolkit_python import report_error, observe_request
 from google.cloud import pubsub_v1
 from google.oauth2 import service_account
 from jsonpath_ng import parse
@@ -100,52 +100,56 @@ class APIToolkit(object):
         pass
 
     def __call__(self, request: Request):
-        response = self.get_response(request)
         if self.debug:
             print("APIToolkit: making request")
-        if self.routes_whitelist:
-            # return early when route does not match any of the whitelist routes
-            if not any([request.path.startswith(route) for route in self.routes_whitelist]):
-                return response
 
         start_time = time.perf_counter_ns()
-        request_method = request.method
-        raw_url = request.url
-        parsed_url = urlsplit(raw_url)
-        url_path_with_query = parsed_url.path + parsed_url.query
-
-        request_body = None
-        query_params =  {key: value for key, value in request.params.items()}
-        request_headers = self.redact_headers_func(request.headers)
-        content_type = request.headers.get('Content-Type', '')
-
-        if content_type == 'application/json':
-            request_body = request.json_body
-        if content_type == 'text/plain':
-            request_body = request.body.decode('utf-8')
-        if content_type == 'application/x-www-form-urlencoded' or 'multipart/form-data' in content_type:
-            request_body = dict(request.POST.copy())
         request.apitoolkit_message_id = str(uuid.uuid4())
         request.apitoolkit_errors = []
         request.apitoolkit_client = self
 
+        response = self.get_response(request)
+        
+        url_path = request.matched_route.pattern if request.matched_route is not None else request.path
+
+        if self.routes_whitelist:
+            # return early when route does not match any of the whitelist routes
+            if not any([url_path.startswith(route) for route in self.routes_whitelist]):
+                return response
+
         if self.debug:
             print("APIToolkit: after request")
-        end_time = time.perf_counter_ns()
-        url_path = request.matched_route.pattern if request.matched_route is not None else request.path
-        path_params = request.matchdict
-        duration = (end_time - start_time)
-        status_code = response.status_code
-        request_body = json.dumps(request_body)
-        response_headers = self.redact_headers_func(response.headers)
-        request_body = self.redact_fields(
-            request_body, self.redact_request_body)
-        response_body = self.redact_fields(
-            response.body, self.redact_response_body)
-        timestamp = datetime.now(pytz.timezone("UTC")).isoformat()
-        message_id = request.apitoolkit_message_id
-        errors = request.apitoolkit_errors
         try:
+            request_method = request.method
+            raw_url = request.url
+            parsed_url = urlsplit(raw_url)
+            url_path_with_query = parsed_url.path + parsed_url.query
+            request_body = None
+            query_params =  {key: value for key, value in request.params.items()}
+            request_headers = self.redact_headers_func(request.headers)
+            content_type = request.headers.get('Content-Type', '')
+
+            if content_type == 'application/json':
+                request_body = request.json_body
+            if content_type == 'text/plain':
+                request_body = request.body.decode('utf-8')
+            if content_type == 'application/x-www-form-urlencoded' or 'multipart/form-data' in content_type:
+                request_body = dict(request.POST.copy())
+            
+            end_time = time.perf_counter_ns()
+            url_path = request.matched_route.pattern if request.matched_route is not None else request.path
+            path_params = request.matchdict
+            duration = (end_time - start_time)
+            status_code = response.status_code
+            request_body = json.dumps(request_body)
+            response_headers = self.redact_headers_func(response.headers)
+            request_body = self.redact_fields(
+                request_body, self.redact_request_body)
+            response_body = self.redact_fields(
+                response.body, self.redact_response_body)
+            timestamp = datetime.now(pytz.timezone("UTC")).isoformat()
+            message_id = request.apitoolkit_message_id
+            errors = request.apitoolkit_errors
             payload = {
                 "query_params": query_params,
                 "path_params": path_params,
