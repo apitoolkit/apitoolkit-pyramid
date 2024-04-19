@@ -14,6 +14,12 @@ Add your APIToolkit API key `APITOOLKIT_KEY` to your `development.ini` or `produ
 APITOOLKIT_KEY = "<YOUR_API_KEY>"
 ```
 
+When using ini files separate mulitple values with comma.
+
+```ini
+APITOOLKIT_REDACT_HEADERS = X-Secret1,X-Secret2
+```
+
 Then add apitoolkit pyramid tween in your server's config:
 
 ```python
@@ -54,6 +60,7 @@ APITOOLKIT_REDACT_HEADERS: `optional` List of headers to redact in captured requ
 APITOOLKIT_DEBUG: `optional` Flag to enable debug mode.
 APITOOLKIT_REDACT_REQ_BODY: `optional` List of fields to redact in request bodies.
 APITOOLKIT_REDACT_RES_BODY: `optional` List of fields to redact in response bodies.
+APITOOLKIT_ROUTES_WHITELIST: `optional` List of routes prefixes that should be captured.
 APITOOLKIT_SERVICE_VERSION: `optional` Version of the service (helps in monitoring different versions of your deployments).
 APITOOLKIT_TAGS: `optional` Tags associated with the service.
 
@@ -81,6 +88,18 @@ The choice of JSONPath was selected to allow you have great flexibility in desci
 Also note that these list of items to be redacted will be aplied to all endpoint requests and responses on your server.
 To learn more about jsonpath to help form your queries, please take a look at this cheatsheet:
 [https://lzone.de/cheat-sheet/JSONPath](https://lzone.de/cheat-sheet/JSONPath)
+
+## Routes Whitelist
+
+If you only want to capture specific app routes you can configure prefixes that need be matched.
+
+```python
+settings = {
+"APITOOLKIT_ROUTES_WHITELIST": ["/api/first", "/api/second"],
+}
+```
+
+This will only capture requests that are incoming to your app with these prefixes, e.a. `/api/first/customer/1` but not `/api/health`.
 
 ## Debugging
 
