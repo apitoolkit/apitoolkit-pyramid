@@ -175,6 +175,8 @@ class APIToolkit(object):
                 "tags": self.tags,
                 "timestamp": timestamp
             }
+            if self.debug: 
+                print(payload)
             self.publish_message(payload)
         except Exception as e:
             return response
