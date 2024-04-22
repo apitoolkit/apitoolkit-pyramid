@@ -55,14 +55,21 @@ You can add more configurations in your settings to customize behavior, such as 
 
 ### Configuration Parameters
 
-APITOOLKIT_KEY: `required` API key for accessing the APIToolkit service.
-APITOOLKIT_REDACT_HEADERS: `optional` List of headers to redact in captured requests.
-APITOOLKIT_DEBUG: `optional` Flag to enable debug mode.
-APITOOLKIT_REDACT_REQ_BODY: `optional` List of fields to redact in request bodies.
-APITOOLKIT_REDACT_RES_BODY: `optional` List of fields to redact in response bodies.
-APITOOLKIT_ROUTES_WHITELIST: `optional` List of routes prefixes that should be captured.
-APITOOLKIT_SERVICE_VERSION: `optional` Version of the service (helps in monitoring different versions of your deployments).
-APITOOLKIT_TAGS: `optional` Tags associated with the service.
+`APITOOLKIT_KEY`: `required` API key for accessing the APIToolkit service
+
+`APITOOLKIT_REDACT_HEADERS`: `optional` List of headers to redact in captured requests. 
+
+`APITOOLKIT_DEBUG`: `optional` Flag to enable debug mode. 
+
+`APITOOLKIT_REDACT_REQ_BODY`: `optional` List of fields to redact in request bodies. 
+
+`APITOOLKIT_REDACT_RES_BODY`: `optional` List of fields to redact in response bodies. 
+
+`APITOOLKIT_ROUTES_WHITELIST`: `optional` List of routes prefixes that should be captured.
+
+`APITOOLKIT_SERVICE_VERSION`: `optional` Version of the service (helps in monitoring different versions of your deployments).
+
+`APITOOLKIT_TAGS`: `optional` Tags associated with the service.
 
 ## Client Redacting fields
 
