@@ -7,7 +7,7 @@ from urllib.parse import urlsplit
 
 import pytz
 import requests
-from apitoolkit_python import report_error, observe_request
+from apitoolkit_python import observe_request, report_error
 from google.cloud import pubsub_v1
 from google.oauth2 import service_account
 from jsonpath_ng import parse
@@ -20,6 +20,7 @@ OPTIONAL_SETTINGS = (
     ('redact_request_body', 'APITOOLKIT_REDACT_REQ_BODY', list, []),
     ('redact_response_body', 'APITOOLKIT_REDACT_RES_BODY', list, []),
     ('routes_whitelist', 'APITOOLKIT_ROUTES_WHITELIST', list, []),
+    ('ignore_http_codes', 'APITOOLKIT_IGNORE_HTTP_CODES', list, []),
     ('service_version', 'APITOOLKIT_SERVICE_VERSION', str, None),
     ('tags', 'APITOOLKIT_TAGS', list, []),
 )
@@ -109,13 +110,17 @@ class APIToolkit(object):
         request.apitoolkit_client = self
 
         response = self.get_response(request)
-        
+        status_code = response.status_code
+
         url_path = request.matched_route.pattern if request.matched_route is not None else request.path
 
+        # return early conditions (no logging)
         if self.routes_whitelist:
-            # return early when route does not match any of the whitelist routes
+            # when route does not match any of the whitelist routes
             if not any([url_path.startswith(route) for route in self.routes_whitelist]):
                 return response
+        if status_code in [int(code) for code in self.ignore_http_codes]:
+            return response
 
         if self.debug:
             print("APIToolkit: after request")
@@ -135,12 +140,11 @@ class APIToolkit(object):
                 request_body = request.body.decode('utf-8')
             if content_type == 'application/x-www-form-urlencoded' or 'multipart/form-data' in content_type:
                 request_body = dict(request.POST.copy())
-            
+
             end_time = time.perf_counter_ns()
             url_path = request.matched_route.pattern if request.matched_route is not None else request.path
             path_params = request.matchdict
             duration = (end_time - start_time)
-            status_code = response.status_code
             request_body = json.dumps(request_body)
             response_headers = self.redact_headers_func(response.headers)
             request_body = self.redact_fields(
@@ -175,7 +179,7 @@ class APIToolkit(object):
                 "tags": self.tags,
                 "timestamp": timestamp
             }
-            if self.debug: 
+            if self.debug:
                 print(payload)
             self.publish_message(payload)
         except Exception as e:
