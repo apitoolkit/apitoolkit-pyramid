@@ -57,15 +57,17 @@ You can add more configurations in your settings to customize behavior, such as 
 
 `APITOOLKIT_KEY`: `required` API key for accessing the APIToolkit service
 
-`APITOOLKIT_REDACT_HEADERS`: `optional` List of headers to redact in captured requests. 
+`APITOOLKIT_REDACT_HEADERS`: `optional` List of headers to redact in captured requests.
 
-`APITOOLKIT_DEBUG`: `optional` Flag to enable debug mode. 
+`APITOOLKIT_DEBUG`: `optional` Flag to enable debug mode.
 
-`APITOOLKIT_REDACT_REQ_BODY`: `optional` List of fields to redact in request bodies. 
+`APITOOLKIT_REDACT_REQ_BODY`: `optional` List of fields to redact in request bodies.
 
-`APITOOLKIT_REDACT_RES_BODY`: `optional` List of fields to redact in response bodies. 
+`APITOOLKIT_REDACT_RES_BODY`: `optional` List of fields to redact in response bodies.
 
 `APITOOLKIT_ROUTES_WHITELIST`: `optional` List of routes prefixes that should be captured.
+
+`APITOOLKIT_IGNORE_HTTP_CODES`: `optional` List of HTTP status codes that should NOT be captured.
 
 `APITOOLKIT_SERVICE_VERSION`: `optional` Version of the service (helps in monitoring different versions of your deployments).
 
@@ -107,6 +109,16 @@ settings = {
 ```
 
 This will only capture requests that are incoming to your app with these prefixes, e.a. `/api/first/customer/1` but not `/api/health`.
+
+## Ignore HTTP status codes
+
+You can exclude HTTP response status codes that you're not interested in or that are spamming your log.
+
+```python
+settings = {
+"APITOOLKIT_IGNORE_HTTP_CODES": [404, 429],
+}
+```
 
 ## Debugging
 
