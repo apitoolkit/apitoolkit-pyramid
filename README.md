@@ -1,26 +1,52 @@
-# API Toolkit Python Pyramid SDK
+<div align="center">
 
-The API Toolkit Pyramid client is an sdk used to integrate Pyramid web applications with APIToolkit.
-It monitors incoming traffic, gathers the requests and sends the request to the apitoolkit servers.
+![APItoolkit's Logo](https://github.com/apitoolkit/.github/blob/main/images/logo-white.svg?raw=true#gh-dark-mode-only)
+![APItoolkit's Logo](https://github.com/apitoolkit/.github/blob/main/images/logo-black.svg?raw=true#gh-light-mode-only)
 
-## How to Integrate:
+## Pyramid SDK
 
-First install the apitoolkit pyramid sdk:
-`pip install apitoolkit-pyramid`
+[![APItoolkit SDK](https://img.shields.io/badge/APItoolkit-SDK-0068ff?logo=python)](https://github.com/topics/apitoolkit-sdk) [![PyPI - Version](https://img.shields.io/pypi/v/apitoolkit-pyramid)](https://pypi.org/project/apitoolkit-pyramid) [![PyPI - Downloads](https://img.shields.io/pypi/dw/apitoolkit-pyramid)](https://pypi.org/project/apitoolkit-pyramid) [![Join Discord Server](https://img.shields.io/badge/Chat-Discord-7289da)](https://discord.gg/dEB6EjQnKB) [![APItoolkit Docs](https://img.shields.io/badge/Read-Docs-0068ff)](https://apitoolkit.io/docs/sdks/python/pyramid?utm_source=github-sdks) 
 
-Add your APIToolkit API key `APITOOLKIT_KEY` to your `development.ini` or `production.ini` files or in your settings:
+APItoolkit is an end-to-end API and web services management toolkit for engineers and customer support teams. To integrate your Pyramid (Python) application with APItoolkit, you need to use this SDK to monitor incoming traffic, aggregate the requests, and then deliver them to the APItoolkit's servers.
+
+</div>
+
+---
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Contributing and Help](#contributing-and-help)
+- [License](#license)
+
+---
+
+## Installation
+
+Kindly run the command below to install the SDK:
+
+```sh
+pip install apitoolkit-pyramid
+```
+
+## Configuration
+
+Next, add the `APITOOLKIT_KEY` variable to your `development.ini` or `production.ini` file or settings, like so:
 
 ```python
-APITOOLKIT_KEY = "<YOUR_API_KEY>"
+settings = {
+    "APITOOLKIT_KEY" = "{ENTER_YOUR_API_KEY_HERE}"
+
+    "APITOOLKIT_DEBUG" = False
+    "APITOOLKIT_TAGS" = ["environment: production", "region: us-east-1"]
+    "APITOOLKIT_SERVICE_VERSION" = "v2.0"
+    "APITOOLKIT_ROUTES_WHITELIST" = ["/api/first", "/api/second"]
+    "APITOOLKIT_IGNORE_HTTP_CODES" = [404, 429]
+}
 ```
 
-When using ini files separate mulitple values with comma.
-
-```ini
-APITOOLKIT_REDACT_HEADERS = X-Secret1,X-Secret2
-```
-
-Then add apitoolkit pyramid tween in your server's config:
+Then, initialize APItoolkit in your application's entry point (e.g., `app.py`), like so:
 
 ```python
 from wsgiref.simple_server import make_server
@@ -36,9 +62,9 @@ def home(request):
     return Response('Welcome!')
 
 if __name__ == '__main__':
-    setting = {"APITOOLKIT_KEY": "<YOUR_API_KEY>"}
+    setting = {"APITOOLKIT_KEY": "{ENTER_YOUR_API_KEY_HERE}"}
     with Configurator(settings=setting) as config:
-        # add aptoolkit tween
+        # Initialize APItoolkit
         config.add_tween("apitoolkit_pyramid.APIToolkit")
         config.add_route('home', '/')
         config.scan()
@@ -47,123 +73,31 @@ if __name__ == '__main__':
     server.serve_forever()
 ```
 
-This will monitor all requests and send them to the APIToolkit's servers.
+> [!NOTE]
+> 
+> The `{ENTER_YOUR_API_KEY_HERE}` demo string should be replaced with the [API key](https://apitoolkit.io/docs/dashboard/settings-pages/api-keys?utm_source=github-sdks) generated from the APItoolkit dashboard.
 
-## Configuration
+<br />
 
-You can add more configurations in your settings to customize behavior, such as redacting senstive fields, printing values to help with debugging and so on.
+> [!IMPORTANT]
+> 
+> To learn more configuration options (redacting fields, error reporting, outgoing requests, etc.), please read this [SDK documentation](https://apitoolkit.io/docs/sdks/python/pyramid?utm_source=github-sdks).
 
-### Configuration Parameters
+## Contributing and Help
 
-`APITOOLKIT_KEY`: `required` API key for accessing the APIToolkit service
+To contribute to the development of this SDK or request help from the community and our team, kindly do any of the following:
+- Read our [Contributors Guide](https://github.com/apitoolkit/.github/blob/main/CONTRIBUTING.md).
+- Join our community [Discord Server](https://discord.gg/dEB6EjQnKB).
+- Create a [new issue](https://github.com/apitoolkit/apitoolkit-pyramid/issues/new/choose) in this repository.
 
-`APITOOLKIT_REDACT_HEADERS`: `optional` List of headers to redact in captured requests.
+## License
 
-`APITOOLKIT_DEBUG`: `optional` Flag to enable debug mode.
+This repository is published under the [MIT](LICENSE) license.
 
-`APITOOLKIT_REDACT_REQ_BODY`: `optional` List of fields to redact in request bodies.
+---
 
-`APITOOLKIT_REDACT_RES_BODY`: `optional` List of fields to redact in response bodies.
+<div align="center">
+    
+<a href="https://apitoolkit.io?utm_source=github-sdks" target="_blank" rel="noopener noreferrer"><img src="https://github.com/apitoolkit/.github/blob/main/images/icon.png?raw=true" width="40" /></a>
 
-`APITOOLKIT_ROUTES_WHITELIST`: `optional` List of routes prefixes that should be captured.
-
-`APITOOLKIT_IGNORE_HTTP_CODES`: `optional` List of HTTP status codes that should NOT be captured.
-
-`APITOOLKIT_SERVICE_VERSION`: `optional` Version of the service (helps in monitoring different versions of your deployments).
-
-`APITOOLKIT_TAGS`: `optional` Tags associated with the service.
-
-## Client Redacting fields
-
-The SDK provides a way for customers to redact senstive fields from data it sends to APIToolkit servers, redacting means that those fields would never leave your servers at all. So you feel safer that your sensitive data only stays on your servers.
-
-To mark fields that should be redacted, add them to your application's settings.
-Eg:
-
-```python
-settings = {
-"APITOOLKIT_KEY": "<YOUR_API_KEY>",
-"APITOOLKIT_REDACT_HEADERS": ["Authorization", "Cookie","Content-Length", "Content-Type"],
-"APITOOLKIT_REDACT_REQ_BODY": ["$.password", "$.credit_card"],
-"APITOOLKIT_REDACT_RES_BODY": ["$.credentials", "$.social_security_number"]
-}
-
-```
-
-It is important to note that while the `APITOOLKIT_REDACT_HEADERS` config field accepts a list of headers(case insensitive),
-the `APITOOLKIT_REDACT_REQ_BODY` and `APITOOLKIT_REDACT_RES_BODY` expects a list of JSONPath strings as arguments.
-
-The choice of JSONPath was selected to allow you have great flexibility in descibing which fields within your responses are sensitive.
-Also note that these list of items to be redacted will be aplied to all endpoint requests and responses on your server.
-To learn more about jsonpath to help form your queries, please take a look at this cheatsheet:
-[https://lzone.de/cheat-sheet/JSONPath](https://lzone.de/cheat-sheet/JSONPath)
-
-## Routes Whitelist
-
-If you only want to capture specific app routes you can configure prefixes that need be matched.
-
-```python
-settings = {
-"APITOOLKIT_ROUTES_WHITELIST": ["/api/first", "/api/second"],
-}
-```
-
-This will only capture requests that are incoming to your app with these prefixes, e.a. `/api/first/customer/1` but not `/api/health`.
-
-## Ignore HTTP status codes
-
-You can exclude HTTP response status codes that you're not interested in or that are spamming your log.
-
-```python
-settings = {
-"APITOOLKIT_IGNORE_HTTP_CODES": [404, 429],
-}
-```
-
-## Debugging
-
-You can add `APITOOLKIT_DEBUG` to your app's settings and set it to `True` to enable debug logging from the SDK. This will print out logs for each request/response captured by the tween. APITOOLKIT_DEBUG defaults to `False`.
-
-# Outgoing Requests
-
-To monitor outgoing HTTP requests from your Pyramid application, you can use the `observe_request` function from the `apitoolkit_pyramid` module. This allows you to capture and send copies of all outgoing requests to an apitoolkit server for monitoring and analysis. All outgoing request are associated with the incoming request that trigger them.
-
-### Example
-
-```python
-from pyramid.response import Response
-from pyramid.view import view_config
-from apitoolkit_pyramid import observe_request
-
-@view_config(route_name='home')
-def home(request):
-    resp = observe_request(request).get(
-        "https://jsonplaceholder.typicode.com/todos/2")
-    return Response(resp.read())
-```
-
-The `observe_request` function wraps an httpx client and you can use it just like you would normally use httpx for any request you need.
-
-# Error Reporting
-
-If you’ve used sentry, or bugsnag, or rollbar, then you’re already familiar with this usecase.
-But you can report an error to apitoolkit. A difference, is that errors are always associated with a parent request, and helps you query and associate the errors which occured while serving a given customer request. Unhandled errors are reported automatically but you can also report errors to APIToolkit by using the `report_error` function from the `apitoolkit_pyramid` module to report an error you can report as many errors you want during a request
-
-### Example
-
-```python
-from pyramid.response import Response
-from pyramid.view import view_config
-from apitoolkit_pyramid import observe_request, report_error
-
-
-@view_config(route_name='home')
-def home(request):
-  try:
-    resp = observe_request(request).get(
-        "https://jsonplaceholder.typicode.com/todos/2")
-    return Response(resp.read())
-  except Exception as e:
-    report_error(request, e)
-    return Response("something went wrong")
-```
+</div>
