@@ -32,7 +32,7 @@ pip install apitoolkit-pyramid
 
 ## Configuration
 
-Next, add the `APITOOLKIT_KEY` variable to your `development.ini` or `production.ini` file or settings, like so:
+Next, add the `APITOOLKIT_KEY` variable to your settings, like so:
 
 ```python
 settings = {
